@@ -18,7 +18,7 @@ def distance(p1, p2):
     return np.sum((p1 - p2) ** 2)**0.5
 
 
-def flatImg(sketchFile, colorFile, k=10, nowhite=True):
+def flatImg(sketchFile, colorFile, k=30, nowhite=True):
     '''
     :param sketchFile: 输入的线框图
     :param colorFile: 输入的彩绘图
@@ -35,7 +35,7 @@ def flatImg(sketchFile, colorFile, k=10, nowhite=True):
     mask, mat = preprocess(gray, 254)
     num, eqValues, _ = searchSeg(mat)
     img = gray.convert("RGB")
-    result_img = getSegColor(colorFile, eqValues, mat, num, img, AREA_THRESH=AREA_THRESH, ENABLE_SAVE_UNQUALIFIED=ENABLE_SAVE_UNQUALIFIED)
+    rgb_area, result_img = getSegColor(colorFile, eqValues, mat, num, img)
     #colors = k_means(rgb_area, 10, white=True)
     colors = k_means(colorFile, k, white=nowhite)
     print(colors)
@@ -62,7 +62,7 @@ def flatImg(sketchFile, colorFile, k=10, nowhite=True):
     (filepath, filename) = os.path.split(colorFile)
     (shotname, extension) = os.path.splitext(filename)
     newfilename = filepath + "//" + shotname + "_flatted.png"
-    result_img.show()
+    # result_img.show()
     result_img.save(newfilename)
     end_time = time.time()
     time1 = round(end_time - start_time)
@@ -71,4 +71,4 @@ def flatImg(sketchFile, colorFile, k=10, nowhite=True):
 
 if __name__ == "__main__":
     imgpath = os.getcwd() + "//testimg//"
-    flatImg(imgpath+"3-3.png", imgpath+"3.jpeg", k=30, nowhite=True)
+    flatImg(imgpath+"4-4.png", imgpath+"4.jpeg", 40)

@@ -55,6 +55,7 @@ def preprocess(im, v):
         mat.append(m)
     return mask, mat
 
+
 def eqList2eqValues(eqList, num):
     eqValues = list()
     valueMat = []
