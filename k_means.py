@@ -29,6 +29,7 @@ def toBins(pixel_cnt, bins_num=16):
             bins[tuple(bin_item['v']/bin_item['n'])] = bin_item['n']
     return bins
 
+
 def init_means(bins, k):
     def factor(color,last_mean):
         return 1 - math.exp(((distance(color, last_mean) / 80) ** 2) * -1)
@@ -41,6 +42,7 @@ def init_means(bins, k):
         bins = {k:v*factor(k, means[-1]) for k, v in sorted(bins.items(), key=lambda item:item[1], reverse=True)}
         bins =  {k: v for k, v in sorted(bins.items(), key=lambda item: item[1], reverse=True)}
     return means
+
 
 def k_means(sourceImg, k, init_mean = True, black = False, white = False):
     img = Image.open(sourceImg, mode="RGB")
@@ -107,4 +109,3 @@ def k_means(sourceImg, k, init_mean = True, black = False, white = False):
     for i, color in enumerate(colors):
         colors[i] = (round(color[0]), round(color[1]), round(color[2]))
     return colors
-        
