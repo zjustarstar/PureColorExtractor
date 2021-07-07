@@ -45,16 +45,17 @@ def init_means(bins, k):
 
 
 def k_means(sourceImg, k, init_mean = True, black = False, white = False):
-    img = Image.open(sourceImg, mode="RGB")
+    img = Image.open(sourceImg)
+    if img.mode != "RGB":
+        img = img.convert("RGB")
+    print(sourceImg, img.format, img.size, img.mode)
+    print("k", k)
     maxlen = max(img.size)
-    print(img.size)
     if maxlen > THRESH_SIZE:
         if img.width == maxlen:
             img = img.resize((THRESH_SIZE, int(img.height*500/maxlen)))
         else:
             img = img.resize((int(img.width*500/maxlen), THRESH_SIZE))
-    print(sourceImg, img.format, img.size, img.mode)
-    print("k", k)
     colors = img.getcolors(img.width * img.height)
     pixel_cnt = {}
     for count, pixel in colors:
