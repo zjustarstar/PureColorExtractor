@@ -8,7 +8,7 @@ import numpy as np
 import os
 
 # 线框图中允许的最小区域
-MIN_AREA = 49
+AREA_THRESH = 50
 # 是否保存不合格的图
 ENABLE_SAVE_UNQUALIFIED = False
 
@@ -35,7 +35,7 @@ def flatImg(sketchFile, colorFile, k=10, nowhite=True):
     mask, mat = preprocess(gray, 254)
     num, eqValues, _ = searchSeg(mat)
     img = gray.convert("RGB")
-    rgb_area, result_img = getSegColor(colorFile, eqValues, mat, num, img)
+    result_img = getSegColor(colorFile, eqValues, mat, num, img, AREA_THRESH=AREA_THRESH, ENABLE_SAVE_UNQUALIFIED=ENABLE_SAVE_UNQUALIFIED)
     #colors = k_means(rgb_area, 10, white=True)
     colors = k_means(colorFile, k, white=nowhite)
     print(colors)
@@ -71,4 +71,4 @@ def flatImg(sketchFile, colorFile, k=10, nowhite=True):
 
 if __name__ == "__main__":
     imgpath = os.getcwd() + "//testimg//"
-    flatImg(imgpath+"1-1.png", imgpath+"1.png", k=10, nowhite=True)
+    flatImg(imgpath+"3-3.png", imgpath+"3.jpeg", k=30, nowhite=True)
