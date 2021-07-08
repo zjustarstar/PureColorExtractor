@@ -7,38 +7,34 @@ import time
 import numpy as np
 import os
 
-# 线框图中允许的最小区域
-AREA_THRESH = 50
-# 是否保存不合格的图
-ENABLE_SAVE_UNQUALIFIED = False
-
 
 def distance(p1, p2):
     p1, p2 = np.array(p1), np.array(p2)
     return np.sum((p1 - p2) ** 2)**0.5
 
 
-def flatImg(sketchFile, colorFile, k=30, nowhite=True):
+def flatImg(sketchFile, colorFile, params):
     '''
     :param sketchFile: 输入的线框图
     :param colorFile: 输入的彩绘图
-    :param k: 最终输出的纯色图的颜色数量
-    :param nowhite: 是否不允许存在白色区域,如果True表示不允许存在白色区域
-    :return:
+    :param params: 各种参数的集合体
+    :return: 返回k种颜色
     '''
-    start_time = time.time()
+    k = params["k"]
+    flag_nowhite = params["no_white_color"]
+    flag_showimg = params["show_process_img"]
     print("开始处理图像:{}".format(colorFile))
 
     im = Image.open(sketchFile)
+    print("图像尺寸:{}".format(im.size))
+
     im = alpha_composite_with_color(im)
     gray = im.convert("L")
-    mask, mat = preprocess(gray, 254)
+    mask, mat = preprocess(gray, 200)
     num, eqValues, _ = searchSeg(mat)
     img = gray.convert("RGB")
-    rgb_area, result_img = getSegColor(colorFile, eqValues, mat, num, img)
-    #colors = k_means(rgb_area, 10, white=True)
-    colors = k_means(colorFile, k, white=nowhite)
-    print(colors)
+    result_img = getSegColor(colorFile, eqValues, mat, num, img, params)
+    colors = k_means(colorFile, k, flag_nowhite)
 
     # 生成纯色图
     old_newrgb = {}
@@ -62,13 +58,38 @@ def flatImg(sketchFile, colorFile, k=30, nowhite=True):
     (filepath, filename) = os.path.split(colorFile)
     (shotname, extension) = os.path.splitext(filename)
     newfilename = filepath + "//" + shotname + "_flatted.png"
-    # result_img.show()
+    if flag_showimg:
+        result_img.show("final flatted image")
     result_img.save(newfilename)
-    end_time = time.time()
-    time1 = round(end_time - start_time)
-    print("take", time1, "s")
+    print("对应纯色图像保存为:{}".format(newfilename))
+
+    return colors
 
 
 if __name__ == "__main__":
+
     imgpath = os.getcwd() + "//testimg//"
-    flatImg(imgpath+"4-4.png", imgpath+"4.jpeg", 40)
+    start_time = time.time()
+
+    # 处理过程中可能用到的参数
+    params = {}
+    # 最终生成k种颜色
+    params["k"] = 40
+    # 最终生成的纯色图中不包含白色，默认为True
+    params["no_white_color"] = True
+    # 最小的区域;小于该值的，会被红色标记
+    params["area_thresh"] = 10
+    # 是否保存标记了红色的小区域图像
+    params["save_colored_regions"] = False
+    # 是否显示一些过程图像, 一般用于调试时, 默认为False
+    params["show_process_img"] = True
+
+    # 目前是单张处理，但是如果线框图和彩绘图的文件名是有规律的，可以做成批量处理
+    # 彩绘图像. 生成新的文件时,需要用到彩绘图像名称
+    params["color_filename"] = imgpath+"4.jpeg"
+    kcolors = flatImg(imgpath+"4-4.png", imgpath+"4.jpeg", params)
+    print("{}种颜色:{}".format(params["k"], kcolors))
+
+    end_time = time.time()
+    time1 = round(end_time - start_time)
+    print("process take", time1, "s")

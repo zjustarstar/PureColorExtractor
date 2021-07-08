@@ -44,12 +44,11 @@ def init_means(bins, k):
     return means
 
 
-def k_means(sourceImg, k, init_mean = True, black = False, white = False):
+def k_means(sourceImg, k, init_mean=True, black=False, white=False):
     img = Image.open(sourceImg)
     if img.mode != "RGB":
         img = img.convert("RGB")
-    print(sourceImg, img.format, img.size, img.mode)
-    print("k", k)
+    # print(sourceImg, img.format, img.size, img.mode)
     maxlen = max(img.size)
     if maxlen > THRESH_SIZE:
         if img.width == maxlen:
@@ -71,8 +70,8 @@ def k_means(sourceImg, k, init_mean = True, black = False, white = False):
     else:
         bins = pixel_cnt'''
     bins = toBins(pixel_cnt)
-    print("length of bins:", len(bins))
-    bins =  {k: v for k, v in sorted(bins.items(), key=lambda item: item[1], reverse=True)}
+    # print("length of bins:", len(bins))
+    bins = {k: v for k, v in sorted(bins.items(), key=lambda item: item[1], reverse=True)}
     if len(bins) <= k:
         bins = list(bins.keys())
         x = [bins[-1]]*(k-len(bins))
@@ -106,7 +105,9 @@ def k_means(sourceImg, k, init_mean = True, black = False, white = False):
             break
         else:
             means = new_means
+
     colors = new_means.tolist()[:k]
     for i, color in enumerate(colors):
         colors[i] = (round(color[0]), round(color[1]), round(color[2]))
+
     return colors

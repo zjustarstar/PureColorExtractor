@@ -1,9 +1,16 @@
+import os
 from PIL import Image, ImageDraw
 
-def getSegColor(colorImg, eqValues, mat, num, img, AREA_THRESH = 50, ENABLE_SAVE_UNQUALIFIED=False):
+def getSegColor(colorImg, eqValues, mat, num, img, params):
+    # 一些参数
+    AREA_THRESH = params["area_thresh"]
+    ENABLE_SAVE_UNQUALIFIED = params["save_colored_regions"]
+    flag_showimg = params["show_process_img"]
+    color_filename = params["color_filename"]
+
     colorImg = Image.open(colorImg)
     colorImg = colorImg.convert("RGB")
-    print(colorImg.size)
+
     num_color = []
     for i in range(num):
         num_color.append({})
@@ -17,6 +24,7 @@ def getSegColor(colorImg, eqValues, mat, num, img, AREA_THRESH = 50, ENABLE_SAVE
                 else:
                     num_color[num][rgb] = 1
     #print(num_color)
+
     num_root = {}
     for eqs in eqValues:
         eqs.sort()
@@ -55,10 +63,7 @@ def getSegColor(colorImg, eqValues, mat, num, img, AREA_THRESH = 50, ENABLE_SAVE
                 rgb[B] += k[B]*(float(v)/area)
             rgb = (round(rgb[R]), round(rgb[G]), round(rgb[B]))
             num_rgb[i] = rgb
-            '''if rgb not in rgb_area.keys():
-                rgb_area[rgb] = area
-            else:
-                rgb_area[rgb] += area'''
+
     #print(num_rgb)
     result = Image.new('RGB', colorImg.size)
     result_pixels = result.load()
@@ -72,24 +77,18 @@ def getSegColor(colorImg, eqValues, mat, num, img, AREA_THRESH = 50, ENABLE_SAVE
                     unqualified_pixels.append((w,h))
                 r, g, b = num_rgb[num]
             result_pixels[w,h] = (r, g, b)
-    result.show()
-    result.save("test.png") 
+    if flag_showimg:
+        result.show("image after clustering")
+        # result.save("test.png")
     if ENABLE_SAVE_UNQUALIFIED:
         draw = ImageDraw.Draw(img)
         draw.point(unqualified_pixels, fill = (255,0,0))
-        img.show()
-        img.save("unqualified.png")
+        # 保存小区域信息
+        (filepath, filename) = os.path.split(color_filename)
+        (shotname, extension) = os.path.splitext(filename)
+        newfilename = filepath + "//" + shotname + "_small_reg.png"
+        img.save(newfilename)
+        if flag_showimg:
+            img.show("small regions labeling")
+
     return result
-    '''for num, pixels in unqualified_pixels.items():
-        pixels[0].sort()
-        pixels[1].sort()
-        center = (max(pixels[0])-min(pixels[0])/2, (max(pixels[1])-min(pixels[1]))/2)
-        height, width = max(pixels[0])-min(pixels[0]), max(pixels[1])-min(pixels[1])
-        upLeft = [center[0] - height, center[1] - width]
-        if upLeft[0] < 0:
-            upLeft[0] = 0
-        if upLeft[1] < 0:
-            upLeft[1] = 0
-        draw.rectangle((upLeft[1], upLeft[0], width, height), outline=(255,255,255))
-    result.show()
-    result.save("unqualified.png")'''
